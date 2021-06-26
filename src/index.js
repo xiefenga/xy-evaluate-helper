@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         评教助手
 // @namespace    http://tampermonkey.net/
-// @version      1.0
+// @version      1.1
 // @description  新余学院评教
 // @author       xie feng
 // @match        http://jwxt.xyc.edu.cn/*
