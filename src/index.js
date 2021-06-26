@@ -151,7 +151,7 @@
             window.$notificate('提示', '评教完成，请关闭脚本。');
             return;
         }
-        window.$notificate('提示', '浏览器可能会阻止新窗口，请注意开启');
+        window.$notificate('提示', '浏览器可能会阻止新窗口，请注意开启', 5000);
         const count = $('.Nsb_r_list_fy3 span').html().trim().slice(1, 2);
         const cur = $('#pageIndex').val();
         window.$notificate('提示', `正在评教 ${cur} / ${count}，请等待。`);
@@ -164,7 +164,6 @@
             nextBtn.click();
         } else {
             window.location.reload();
-            window.sessionStorage.setItem('complete', true);
         }
     }
 
