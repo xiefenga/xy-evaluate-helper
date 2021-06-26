@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         评教助手
 // @namespace    http://tampermonkey.net/
-// @version      1.1
+// @version      1.2
 // @description  新余学院评教
 // @author       xie feng
 // @match        http://jwxt.xyc.edu.cn/*
@@ -16,6 +16,8 @@
     const delay = n => new Promise(resolve => setTimeout(resolve, n));
 
     const inject = () => {
+
+        let notifications = [];
 
         const NOTIFICATION_TEMPLATE = `
         <div class="inject-notification">
@@ -45,6 +47,7 @@
             transition: .4s ease-in-out;
             overflow-wrap: anywhere;
             overflow: hidden;
+            height: 84px;
         }
         
         .inject-notification p {
@@ -97,11 +100,19 @@
                 match => match.includes('title') ? title : content
             );
 
-            const notification = $(NOTIFICATION_ELEMENT).css('transform', 'translateX(110%)').appendTo('body');
+            const notification = $(NOTIFICATION_ELEMENT).css({
+                transform: 'translateX(110%)',
+                top: notifications.length * 90 + 16 + 'px'
+            }).appendTo('body');
+
+            notifications.push(notification);
 
             const close = () => {
-                if (notification) {
+                const index = notifications.indexOf(notification);
+                if (index !== -1) {
                     notification.one('transitionend', () => {
+                        notifications.splice(index, 1);
+                        notifications.forEach((n, i) => n.css('top', i * 90 + 16 + 'px'));
                         notification.remove();
                     });
                     notification.css('transform', 'translateX(110%)');
