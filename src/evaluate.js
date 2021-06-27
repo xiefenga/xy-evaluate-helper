@@ -4,11 +4,15 @@ import { delay, notifySuccess, testOpenWindow } from './utils'
 export const confirmStart = async () => {
   const start = window.confirm('是否开始开始评教?');
   if (start) {
-    if (await testOpenWindow()) {
-      notificate('提示', '即将开始自动评教');
-      await delay(1000);
-      $('.wap a')[1].click();
+    if (!await testOpenWindow()) {
+      notificate('提示', '取消自主评教');
+      return;
     }
+    notificate('提示', '即将开始自动评教');
+    await delay(1000);
+    $('.wap a')[1].click();
+  } else {
+    notificate('提示', '取消自主评教');
   }
 }
 
@@ -34,14 +38,16 @@ export const autoEvaluate = async () => {
   window.close();
 }
 
-// 不考虑有人直接进入该页面的情况，太麻烦了
 export const handleEvaluates = async () => {
+
+  // 简单考虑有人直接进入该页面的情况（测试窗口拦截），别的复杂情况就不判断了
+  if (!await testOpenWindow()) {
+    notificate('提示', '取消自主评教');
+    return;
+  }
 
   const count = $('.Nsb_r_list_fy3 span').html().trim().slice(1, 2);
   const cur = $('#pageIndex').val();
-
-  // 该页面被评教次数
-  const nums = Number(window.localStorage.getItem('page' + cur) ?? 0);
 
   // 这一页所有需要评价的列表
   const list = Array.from($('tr td a')).filter(a => a.innerText.includes('评价'));
@@ -51,18 +57,9 @@ export const handleEvaluates = async () => {
   // 查看是否有下一页
   const hasNext = nextBtn.getAttribute('disabled') !== "disabled";
 
-  if (nums > 0 && list.length) {
-    window.confirm('请确保浏览器不会拦截新窗口，并点击确认');
-    await delay(2000);  // 点击允许之后，那些被拦截的窗口会被打开，等一会让他们自动提交
-    window.location.reload();
-  } else if (!list.length) {
-    window.localStorage.removeItem('page' + cur);
-    if (hasNext) {
-      nextBtn.click();
-    }
-  }
-
-  if ((!list.length && !hasNext)) {
+  if (!list.length && hasNext) {
+    nextBtn.click();
+  } else if (!list.length && !hasNext) {
     window.sessionStorage.setItem('complete', 1);
     notifySuccess();
     return;
@@ -72,13 +69,12 @@ export const handleEvaluates = async () => {
 
   await delay(500);
 
-  notificate('提示', `正在评教 ${cur} / ${count}，请等待。`, 5000);
+  notificate('提示', `正在评教 ${cur} / ${count}，请等待。`, null);
 
   for (const a of list) {
     a.click();
     await delay(1000); // 慢点打开，窗口需要加载
   }
-
-  window.localStorage.setItem('page' + cur, Number(nums) + 1);
   window.location.reload();
+
 }

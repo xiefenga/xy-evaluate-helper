@@ -15,8 +15,10 @@ const judge = () => {
   if (!canDoSomething || complete > 3) {
     return;
   } else if (complete > 0) {
-    window.sessionStorage.setItem('complete', Number(complete) + 1);
-    notifySuccess();
+    if (!url.includes(urls[3])) {
+      window.sessionStorage.setItem('complete', Number(complete) + 1);
+      notifySuccess();
+    }
   } else {
     if (url.endsWith(urls[0])) {
       confirmStart();

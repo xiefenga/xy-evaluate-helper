@@ -18,35 +18,37 @@ export const openWindow = url => {
 
   const windowFeatures = `${windowFeatures1},${windowFeatures2}`;
 
-
   return window.open(url, "_blank", windowFeatures);
 }
 
 export const testOpenWindow = async () => {
   let count = 0;
-  if (!window.localStorage.getItem('canOpenWindow')) {
+  if (!window.sessionStorage.getItem('canOpenWindow')) {
     notificate('提示', '开始弹窗测试，以检查是否允许该站点弹窗');
     await delay(1000);
-    while (true) {
+    while (count < 3) {
       const newWindow = openWindow('/');
       if (newWindow === null) {
-        if (++count > 3) {
-          notificate('警告', '你是不是在玩我？？？', null);
-          notificate('警告', '你是不是在玩我？？？', null);
-          notificate('警告', '你是不是在玩我？？？', null);
+        if (count === 0) {
+          notificate('提示', '弹窗被拦截，请手动开启', 5000);
+          notificate('提示', '请查看浏览器提醒（例如地址栏右侧），手动允许该站点弹窗', 5000);
+          await delay(1000); // 不 delay 的画，confirm 会先出来，阻塞 notification的渲染
+        }
+        const confirm = window.confirm('允许弹窗后点击确认'); // 别骗我
+        if (!confirm) {
           return false;
         }
-        notificate('提示', '弹窗被拦截，请手动开启', null);
-        notificate('提示', '请查看浏览器提醒（例如地址栏右侧），手动允许该站点弹窗', null);
-        window.confirm('允许弹窗后点击确认'); // 别骗我
+        count++;
       } else {
         notificate('提示', '弹窗测试通过');
         await delay(500);
         newWindow.close();
-        window.localStorage.getItem('canOpenWindow', true);
-        break;
+        window.sessionStorage.setItem('canOpenWindow', true);
+        return true;
       }
     }
+  } else {
+    return true;
   }
-  return true;
+  return false;
 }
